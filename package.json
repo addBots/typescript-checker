@@ -1,0 +1,27 @@
+{
+  "name": "typescript-checker",
+  "version": "1.0.0",
+  "description": "Powerful data validation library enabling type safety",
+  "main": "build/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/addBots/typescript-checker.git"
+  },
+  "keywords": [
+    "typescript",
+    "type",
+    "checker",
+    "safety",
+    "json",
+    "validate"
+  ],
+  "author": "addBots",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/addBots/typescript-checker/issues"
+  },
+  "homepage": "https://github.com/addBots/typescript-checker#readme"
+}
