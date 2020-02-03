@@ -4,6 +4,8 @@
 	"description": "Powerful data validation library enabling type safety",
 	"main": "build/index.js",
 	"scripts": {
+		"build": "tsc --project tsconfig.build.json",
+		"build:watch": "tsc --project tsconfig.json --watch",
 		"lint": "eslint ./src/ --ext .ts,.tsx,.js,.jsx",
 		"lint:fix": "eslint ./src/ --ext .ts,.tsx,.js,.jsx --fix",
 		"prettify": "prettier --config .prettierrc.js --ignore-path .prettierignore --write ./src/**/*.{ts,tsx,js,jsx}"
@@ -40,6 +42,7 @@
 		"eslint-config-prettier": "^6.10.0",
 		"eslint-plugin-react": "^7.18.3",
 		"eslint-plugin-react-hooks": "^2.3.0",
-		"husky": "^4.2.1"
+		"husky": "^4.2.1",
+		"typescript": "^3.7.5"
 	}
 }

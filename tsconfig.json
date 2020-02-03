@@ -1,0 +1,29 @@
+{
+	"compilerOptions": {
+		"lib": ["es2018"],
+		"target": "es5",
+		"module": "commonjs",
+		"moduleResolution": "node",
+		"forceConsistentCasingInFileNames": true,
+		"strict": true,
+		"noImplicitReturns": true,
+		"allowSyntheticDefaultImports": true,
+		"declaration": true,
+		"sourceMap": true,
+		"noUnusedLocals": false,
+		"resolveJsonModule": false,
+		"esModuleInterop": true,
+		"incremental": true,
+		"composite": true,
+		"rootDir": "src",
+		"outDir": "dist",
+		"baseUrl": "src",
+		"preserveConstEnums": true,
+		"noImplicitAny": true,
+		"skipLibCheck": true,
+		"strictNullChecks": true,
+		"suppressImplicitAnyIndexErrors": true
+	},
+	"include": ["src"],
+	"compileOnSave": true
+}
