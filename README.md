@@ -307,6 +307,61 @@ const checkAllUppercase: Checker<string, string> = (value) => {
 }
 ```
 
+### Type Inference
+
+The interface `CheckerSuccess` enables you to infer the type of a checker.
+
+```typescript
+const checkBody = Keys({
+	name: And(TypeString, MinLength(2)),
+	age: TypeNumber,
+	meta: Keys({
+		canFly: TypeBoolean,
+		pickupItems: Items(OneOf("egg", "grass", "stone")),
+	}),
+})
+
+type IBody = CheckerSuccess<typeof checkBody>
+// equals type/interface
+type IBody = {
+	name: string
+	age: number
+	meta: {
+		canFly: boolean
+		pickupItems: ("egg" | "gras" | "stone")[]
+	}
+}
+```
+
+In some cases, for complex or deeply nested checkers, typescript is not able to infer the type (anymore). In this cases, or if you prefer to declare your interfaces and types separately, you can just provide the type to the checker to make sure your types and checkers are in sync.
+
+```typescript
+interface IBody = {
+	name: string
+	age: number
+	meta: {
+		canFly: boolean
+		pickupItems: ("egg" | "gras" | "stone")[]
+	}
+}
+
+// no compiler error
+const checkBody = Keys<IBody>({
+	name: And(TypeString, MinLength(2)),
+	age: TypeNumber,
+	meta: Keys({
+		canFly: TypeBoolean,
+		pickupItems: Items(OneOf("egg", "grass", "stone")),
+	}),
+})
+
+// compiler error -> key "meta" is missing in checker
+const checkBody = Keys<IBody>({
+	name: And(TypeString, MinLength(2)),
+	age: TypeNumber,
+})
+```
+
 ## Roadmap / Todo
 
 -   [ ] JS docs annotations
