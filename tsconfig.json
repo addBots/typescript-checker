@@ -9,7 +9,7 @@
 		"noImplicitReturns": true,
 		"allowSyntheticDefaultImports": true,
 		"declaration": true,
-		"sourceMap": true,
+		"sourceMap": false,
 		"noUnusedLocals": false,
 		"resolveJsonModule": false,
 		"esModuleInterop": true,
