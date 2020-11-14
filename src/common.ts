@@ -1,4 +1,4 @@
-import { stringifyObject } from "utils"
+import { stringifyObject } from "./utils"
 import {
 	Type,
 	OneOf,
@@ -11,7 +11,6 @@ import {
 	ItemsSchema,
 	ItemsPartial,
 	isCheckError,
-	isCheckValid,
 } from "./core"
 
 export const TypeUndefined = Type("undefined")
@@ -43,7 +42,34 @@ export const TypeParseInt: Checker<unknown, string> = (value) => {
 
 	const number = parseInt(string[1], 10)
 	if (isNaN(number)) {
-		return [["expected a string containing a number, found " + stringifyObject(value)]]
+		return [["expected a string containing an integer, found " + stringifyObject(value)]]
+	}
+
+	return string
+}
+
+export const TypeParseFloat: Checker<unknown, string> = (value) => {
+	const string = TypeString(value)
+	if (isCheckError(string)) {
+		return string
+	}
+
+	const number = parseFloat(string[1])
+	if (isNaN(number)) {
+		return [["expected a string containing a float, found " + stringifyObject(value)]]
+	}
+
+	return string
+}
+
+export const TypeParseBoolean: Checker<unknown, string> = (value) => {
+	const string = TypeString(value)
+	if (isCheckError(string)) {
+		return string
+	}
+
+	if (string[1] !== "true" && string[1] !== "false") {
+		return [["expected a string containing a boolean, found " + stringifyObject(value)]]
 	}
 
 	return string
@@ -169,7 +195,7 @@ export const ConvertDate: Checker<unknown, Date> = And(TypeString, (value: strin
 		return [[e.message]]
 	}
 })
-export const TypeDate = And(TypeString, parsesAs<string>(ConvertDate))
+export const TypeParseDate = And(TypeString, parsesAs<string>(ConvertDate))
 
 export const Transform = <T, R>(transformFn: (value: T) => R): Checker<T, R> => (value) => [null, transformFn(value)]
 
