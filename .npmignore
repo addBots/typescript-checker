@@ -4,3 +4,5 @@ src
 .prettierrc.js
 tsconfig.build.json
 tsconfig.json
+.github/
+*.tsbuildinfo
