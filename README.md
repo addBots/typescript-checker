@@ -224,6 +224,15 @@ try {
     const fallbackResult = myChecker(42) // fallbackResult is "Take this as default value"
     ```
 
+-   `withDefault` is not a checker, but takes a checker result and a default value
+
+    ```typescript
+    const myChecker = TypeSting
+
+    const validResult = withDefault(myChecker("Hello World"), "Take this as default value") // validResult is "Hello World"
+    const fallbackResult = withDefault(myChecker(42), "Take this as default value") // fallbackResult is "Take this as default value"
+    ```
+
 -   `ConvertJSON` takes a string value and tries to parse its JSON content
 
     ```typescript

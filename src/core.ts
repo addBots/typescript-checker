@@ -181,3 +181,10 @@ export const Fallback = <A, B>(check: Checker<A | undefined, B>, fallback: () =>
 	}
 	return check(value)
 }
+
+export const withDefault = <T>(check: Check<T>, defaultValue: T): T => {
+	if (isCheckError(check)) {
+		return defaultValue
+	}
+	return check[1]
+}
