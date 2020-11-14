@@ -22,7 +22,9 @@ export type CheckError = [string[]]
 export type ErrorLog = CheckError[0][]
 export type Check<U> = CheckError | CheckValid<U>
 export type Checker<A, B> = { (value: A): Check<B> }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export type CheckerInput<M> = M extends Checker<infer A, infer B> ? A : never
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export type CheckerSuccess<M> = M extends Checker<infer A, infer B> ? B : never
 
 export const isCheckValid = <U>(args: Check<U>): args is CheckValid<U> => args[0] === null
