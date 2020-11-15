@@ -1,3 +1,4 @@
+import { TypeMatches } from "./common"
 import { Checker } from "./core"
 
 export const MinLength = (minLength: number): Checker<string, string> => (value) =>
@@ -14,3 +15,10 @@ export const Max = (max: number): Checker<number, number> => (value) =>
 
 export const Between = (min: number, max: number): Checker<number, number> => (value) =>
 	value >= min && value <= max ? [null, value] : [[`expected number between ${min} and ${max}, found ${value}`]]
+
+// opinionated validators
+
+export const EMail = TypeMatches(
+	"email",
+	/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+)
