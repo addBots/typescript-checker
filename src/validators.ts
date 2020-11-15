@@ -16,6 +16,11 @@ export const Max = (max: number): Checker<number, number> => (value) =>
 export const Between = (min: number, max: number): Checker<number, number> => (value) =>
 	value >= min && value <= max ? [null, value] : [[`expected number between ${min} and ${max}, found ${value}`]]
 
+export const IsUUID: Checker<string, string> = TypeMatches(
+	"UUID",
+	/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+)
+
 // opinionated validators
 
 export const EMail = TypeMatches(
