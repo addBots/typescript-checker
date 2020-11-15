@@ -116,7 +116,8 @@ export const AndNot = <U, A, B>(
 type IAndChain<U, A> = Checker<U, A> & {
 	then: <B>(b: Checker<A, B>) => IAndChain<U, B>
 }
-export const And = <U, A, B>(a: Checker<U, A>, b: Checker<A, B>): Checker<U, B> => {
+
+const _And = <U, A, B>(a: Checker<U, A>, b: Checker<A, B>): Checker<U, B> => {
 	const testA = a
 	const testB = b
 
@@ -129,6 +130,44 @@ export const And = <U, A, B>(a: Checker<U, A>, b: Checker<A, B>): Checker<U, B> 
 		return testB(result[1])
 	}
 }
+
+type AndOverload = {
+	<U, A, B>(a: Checker<U, A>, b: Checker<A, B>): Checker<U, B>
+	<U, A, B, C>(a: Checker<U, A>, b: Checker<A, B>, c: Checker<B, C>): Checker<U, C>
+	<U, A, B, C, D>(a: Checker<U, A>, b: Checker<A, B>, c: Checker<B, C>, d: Checker<C, D>): Checker<U, D>
+	<U, A, B, C, D, E>(
+		a: Checker<U, A>,
+		b: Checker<A, B>,
+		c: Checker<B, C>,
+		d: Checker<C, D>,
+		e: Checker<D, E>,
+	): Checker<U, E>
+	<U, A, B, C, D, E, F>(
+		a: Checker<U, A>,
+		b: Checker<A, B>,
+		c: Checker<B, C>,
+		d: Checker<C, D>,
+		e: Checker<D, E>,
+		f: Checker<D, F>,
+	): Checker<U, F>
+}
+
+export const And: AndOverload = <U, A, B, C, D, E, F>(
+	a: Checker<U, A>,
+	b: Checker<A, B>,
+	c?: Checker<B, C>,
+	d?: Checker<C, D>,
+	e?: Checker<D, E>,
+	f?: Checker<E, F>,
+): Checker<U, unknown> => {
+	if (c && d && e && f) return _And(_And(_And(_And(_And(a, b), c), d), e), f)
+	if (c && d && e) return _And(_And(_And(_And(a, b), c), d), e)
+	if (c && d) return _And(_And(_And(a, b), c), d)
+	if (c && d) return _And(_And(_And(a, b), c), d)
+	if (c) return _And(_And(a, b), c)
+	return _And(a, b)
+}
+
 const AndChain = <U, A>(a: Checker<U, A>) => {
 	const checker: Checker<U, A> & Partial<IAndChain<U, A>> = a.bind(null)
 	checker.then = <B>(b: Checker<A, B>) => AndChain(And(a, b))
