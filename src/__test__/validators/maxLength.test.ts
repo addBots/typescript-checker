@@ -1,4 +1,4 @@
-import { And, isCheckValid, MaxLength, TypeString } from "../../../dist"
+import { And, isCheckValid, MaxLength, TypeString } from "../.."
 
 const checker = And(TypeString, MaxLength(5))
 
