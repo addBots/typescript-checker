@@ -245,7 +245,7 @@ try {
 
 ### Chaining
 
-`And` provide an API for chaining checkers.
+`And` provides an API for chaining checkers.
 
 ```typescript
 // Example 1
@@ -309,7 +309,7 @@ const checkAllUppercase: Checker<string, string> = (value) => {
 
 ### Type Inference
 
-The interface `CheckerSuccess` enables you to infer the type of a checker.
+The type `CheckerSuccess` enables you to infer the type of a checker.
 
 ```typescript
 const checkBody = Keys({
