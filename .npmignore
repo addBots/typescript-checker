@@ -6,3 +6,6 @@ tsconfig.build.json
 tsconfig.json
 .github/
 *.tsbuildinfo
+dist/__test__
+.vscode/settings.json
+jest.json
