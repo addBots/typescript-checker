@@ -1,6 +1,6 @@
-import { And, isCheckValid, MinLength, TypeString } from "../.."
+import { isCheckValid, MinLength } from "../.."
 
-const checker = And(TypeString, MinLength(5))
+const checker = MinLength(5)
 
 test("actual length > min succeeds", () => {
 	expect(isCheckValid(checker("hello world"))).toBeTrue()
