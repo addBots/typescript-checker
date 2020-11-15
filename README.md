@@ -253,6 +253,16 @@ try {
     const invalidResult = myJSONChecker("dodo") // invalidResult holds an error
     ```
 
+### Validators
+
+-   `MinLength(number)` checks if a given string has a minimum length
+-   `MaxLength(number)` checks if a given string has a maximum length
+-   `Min(number)` checks if a given number is greater-equals a certain value
+-   `Max(number)` checks if a given number is less-equals a certain value
+-   `Between(number, number)` checks if a given number is between two given values
+-   `IsUUID` checks if a given string is a valid uuid (v1, v4, or v5)
+-   `EMail` checks if a given string is a valid email address
+
 ### Chaining
 
 `And` provides an API for chaining checkers.

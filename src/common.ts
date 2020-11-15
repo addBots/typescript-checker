@@ -199,11 +199,6 @@ export const TypeParseDate = And(TypeString, parsesAs<string>(ConvertDate))
 
 export const Transform = <T, R>(transformFn: (value: T) => R): Checker<T, R> => (value) => [null, transformFn(value)]
 
-export const MinLength = (minLength: number): Checker<string, string> => (value) =>
-	value.length >= minLength ? [null, value] : [[`expected minimum string length ${minLength}`]]
-export const MaxLength = (maxLength: number): Checker<string, string> => (value) =>
-	value.length <= maxLength ? [null, value] : [[`expected maximum string length ${maxLength}`]]
-
 export const HasKeys = <T>(schema: KeysSchema<T>): Checker<unknown, T> => {
 	const check = And(TypeObject, KeysPartial(schema))
 	return (value) => {

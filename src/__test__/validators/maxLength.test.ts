@@ -1,6 +1,6 @@
-import { And, isCheckValid, MaxLength, TypeString } from "../.."
+import { isCheckValid, MaxLength } from "../.."
 
-const checker = And(TypeString, MaxLength(5))
+const checker = MaxLength(5)
 
 test("actual length > max fails", () => {
 	expect(isCheckValid(checker("hello world"))).toBeFalse()
