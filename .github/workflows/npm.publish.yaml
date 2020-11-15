@@ -43,23 +43,3 @@ jobs:
               run: npm publish
               env:
                   NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
-
-    publish-gpr:
-        needs: build
-        runs-on: ubuntu-latest
-        steps:
-            - name: Download Build Assets
-              uses: actions/download-artifact@v2
-              with:
-                  name: build_assets
-            - name: Checkout
-              uses: actions/checkout@v2
-            - name: Setup Node
-              uses: actions/setup-node@v1
-              with:
-                  node-version: 12
-                  registry-url: https://npm.pkg.github.com/
-            - name: Publish GitHub
-              run: npm publish
-              env:
-                  NODE_AUTH_TOKEN: ${{secrets.NPM_GITHUB_TOKEN}}
