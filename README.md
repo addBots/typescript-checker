@@ -2,6 +2,16 @@
 
 Powerful data type validation library enabling type safety
 
+![Node.js CI](https://github.com/addBots/typescript-checker/workflows/Node.js%20CI/badge.svg)
+<a href="https://npmjs.com/package/typescript-checker" target="\_parent">
+<img alt="" src="https://img.shields.io/npm/dm/typescript-checker.svg" />
+</a>
+<a href="https://bundlephobia.com/result?p=typescript-checker@latest" target="\_parent">
+<img alt="" src="https://badgen.net/bundlephobia/minzip/typescript-checker@latest" />
+</a><a href="#badge">
+<img alt="semantic-release" src="https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg">
+</a>
+
 -   🔒️ enables type safety on your typescript projects
 -   ✔️ compatibility with typescript 3.x or higher
 -   0️⃣️ zero dependencies
