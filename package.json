@@ -1,6 +1,6 @@
 {
 	"name": "typescript-checker",
-	"version": "1.0.0-rc.0",
+	"version": "1.0.0",
 	"description": "Powerful data validation library enabling type safety",
 	"main": "dist/index.js",
 	"scripts": {
