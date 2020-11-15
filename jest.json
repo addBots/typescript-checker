@@ -1,0 +1,12 @@
+{
+	"rootDir": "./",
+	"transform": {
+		"^.+\\.tsx?$": "ts-jest"
+	},
+	"testEnvironment": "node",
+	"testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(tsx?)$",
+	"moduleFileExtensions": ["ts", "tsx", "js", "jsx", "json"],
+	"preset": "ts-jest",
+	"testMatch": null,
+	"setupFilesAfterEnv": ["jest-extended", "./src/__test__/utils/globalSetupAfterEnv.ts"]
+}
