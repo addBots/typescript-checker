@@ -5,41 +5,17 @@ on:
         types: [created]
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v2
-            - name: Setup Node
-              uses: actions/setup-node@v1
-              with:
-                  node-version: 12
-            - name: Build Project
-              run: |
-                  npm ci
-                  npm run build
-            - name: Upload Build Assets
-              uses: actions/upload-artifact@v2
-              with:
-                  name: build_assets
-                  path: dist
-
     publish-npm:
         needs: build
         runs-on: ubuntu-latest
         steps:
-            - name: Download Build Assets
-              uses: actions/download-artifact@v2
-              with:
-                  name: build_assets
-            - name: Checkout
-              uses: actions/checkout@v2
-            - name: Setup Node
-              uses: actions/setup-node@v1
+            - uses: actions/checkout@v2
+            - uses: actions/setup-node@v1
               with:
                   node-version: 12
                   registry-url: https://registry.npmjs.org/
-            - name: Publish NPM
-              run: npm publish
+            - run: npm ci
+            - run: npm run build
+            - run: npm publish
               env:
                   NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
