@@ -12,8 +12,8 @@ Powerful data type validation library enabling type safety
 <img alt="semantic-release" src="https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg">
 </a>
 
--   🔒️ enables type safety on your typescript projects
--   ✔️ compatibility with typescript 3.x or higher
+-   🔒️ enables type safety on your TypeScript projects
+-   ✔️ compatibility with TypeScript 3.x, (4.x after known issues are resolved)
 -   0️⃣️ zero dependencies
 -   🚀️ super small bundle size
 -   👵️ es5 compatibility
@@ -27,7 +27,7 @@ const validBody = {
 	age: 42,
 	meta: {
 		canFly: false,
-		pickupItems: ["egg", "gras"],
+		pickupItems: ["egg", "grass"],
 	},
 }
 const invalidBody = {
@@ -55,7 +55,7 @@ type IBody = {
 	age: number
 	meta: {
 		canFly: boolean
-		pickupItems: ("egg" | "gras" | "stone")[]
+		pickupItems: ("egg" | "grass" | "stone")[]
 	}
 }
 
@@ -64,7 +64,7 @@ type IBody = {
 
 ## Installation
 
-Requires typescript 3.x or higher
+Requires TypeScript 3.x or higher
 
 ```
 npm i typescript-checker
@@ -80,7 +80,7 @@ yarn add typescript-checker
 
 A `Checker` is a function to which a `value` can be passed, which should be validated. The `Checker` itself can be a base type checker like `TypeString`, a more complex checker with nested properties like `Keys` or `Items`, or a chain of different (logically connected) checker like `And(TypeString, MinLength(2))` or `And.then(Fallback(TypeString, () => "[]")).then(parseFilterQuery)`.
 
-The `Checker` can be invoked like a function, returning a tuple `[errors, validValue]`. Either `errors` or `validValue` is null, which can be convienentily checked via `isCheckError(<result>)` and `isCheckValid(<result>)`.
+The `Checker` can be invoked like a function, returning a tuple `[errors] | [null, validValue]`. Either `errors` contains a list of errors, or `validValue` returns the validated and stripped value. Both cases can be conveniently checked via `isCheckError(<result>)` and `isCheckValid(<result>)`.
 Alternatively, you can use the provided `check(<checker>, <value>)` function throwing a JavaScript `Error`, which can be `try/catch`ed.
 
 ```typescript
@@ -89,7 +89,7 @@ const validBody = {
 	age: 42,
 	meta: {
 		canFly: false,
-		pickupItems: ["egg", "gras"],
+		pickupItems: ["egg", "grass"],
 	},
 }
 const invalidBody = {
@@ -149,31 +149,52 @@ try {
 -   `TypeObject`
 -   `TypeArray`
 -   `TypeEnum` (typescript only)
+
+    ```typescript
+    enum Status {
+    	Pending,
+    	Accepted,
+    	Closed,
+    }
+
+    const checkStatus = TypeEnum(Status)
+    ```
+
 -   `TypeEnumString` (typescript only)
+
+    ```typescript
+    enum Status {
+    	Pending = "pending",
+    	Accepted = "accepted",
+    	Closed = "closed",
+    }
+
+    const checkStatus = TypeEnumString(Status)
+    ```
 
 ### Common Type Checker
 
 -   `TypeMatches` (tests for a regex match)
 
--   `TypeParseInt` (string which holds an integer value)
--   `TypeParseFloat` (string which holds an integer value)
--   `TypeParseBoolean` (string which holds an boolean value)
--   `TypeParseDate` (string which holds an stringified Date value)
+-   `TypeParseInt` (string which holds an integer value, returns string)
+-   `TypeParseFloat` (string which holds an integer value, returns string)
+-   `TypeParseBoolean` (string which holds an boolean value, returns string)
+-   `TypeParseDate` (string which holds an stringified Date value, returns string)
 
 -   `ConvertParseInt` (string which holds an integer value, returns number)
 -   `ConvertParseFloat` (string which holds a float value, returns number)
 -   `ConvertParseBoolean` (string which holds a boolean value, returns boolean)
 -   `ConvertDate` (string/number representing a valid Date, returns Date)
 
-### Logic Checker
+### Checker Composition
 
--   `And` logical `and` operation (lhs and rhs must be valid)
+-   `And(checkerA, checkerB)` like function composition (if checkerA succeeds, check the result using checkerB)
 
     ```typescript
     And(TypeString, MinLength(10)) // string which is at least 10 characters long
     ```
 
--   `Or` logical `or` operation (lhs or rhs must be valid)
+-   `Or(checkerA, checkerB, ...)` check union type (if checkerA fails, check original value using checkerB)
     ```typescript
     Or(TypeNull, TypeString) // accepts a string or null
     Or(TypeUndefined, TypeNumber) // accepts a number or undefined
@@ -322,7 +343,7 @@ const checkAllUppercase: Checker<string, string> = (value) => {
 	if (value === value.toUpperCase()) {
 		return [null, value]
 	} else {
-		return [[`expected string with all uppercase letters, found ${vlaue}`], null]
+		return [[`expected string with all uppercase letters, found ${value}`]]
 	}
 }
 ```
@@ -348,20 +369,20 @@ type IBody = {
 	age: number
 	meta: {
 		canFly: boolean
-		pickupItems: ("egg" | "gras" | "stone")[]
+		pickupItems: ("egg" | "grass" | "stone")[]
 	}
 }
 ```
 
-In some cases, for complex or deeply nested checkers, typescript is not able to infer the type (anymore). In this cases, or if you prefer to declare your interfaces and types separately, you can just provide the type to the checker to make sure your types and checkers are in sync.
+If you prefer to declare your interfaces and types separately, you can just provide the type to the checker to make sure your checked types are assignable to the interface types ahead of time. This can't ensure equivalence for optional members and union types.
 
 ```typescript
-interface IBody = {
+type IBody = {
 	name: string
 	age: number
 	meta: {
 		canFly: boolean
-		pickupItems: ("egg" | "gras" | "stone")[]
+		pickupItems: ("egg" | "grass" | "stone")[]
 	}
 }
 
@@ -382,13 +403,36 @@ const checkBody = Keys<IBody>({
 })
 ```
 
+When providing generics manually, following checkers will only succeed on some instances of IEgg and IPickup.
+
+```typescript
+type IEgg = {
+	type: "egg"
+	weight?: number
+}
+
+type IGrass = {
+	type: "grass"
+}
+
+type IPickup = IEgg | IGrass
+
+const checkSomeEgg = Keys<IEgg>({
+	type: OneOf("egg"),
+	// missing weight
+})
+
+const checkSomePickup = Or<IPickup[]>(checkSomeEgg) // missing grass
+```
+
 ## Roadmap / Todo
 
+-   [ ] Support TypeScript 4.x
 -   [ ] JS docs annotations
 -   [ ] unit tests
--   [ ] convinient `express` integration
+-   [ ] convenient `express` integration
 -   [ ] extend common checkers
--   [ ] convinient `graphql` integration
+-   [ ] convenient `graphql` integration
 
 ## Contributors
 
