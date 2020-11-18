@@ -374,7 +374,7 @@ type IBody = {
 }
 ```
 
-If you prefer to declare your interfaces and types separately, you can just provide the type to the checker to make sure your checked types ar assignable to the interface types ahead of time. This can't ensure equivalence for optional members and union types.
+If you prefer to declare your interfaces and types separately, you can just provide the type to the checker to make sure your checked types are assignable to the interface types ahead of time. This can't ensure equivalence for optional members and union types.
 
 ```typescript
 type IBody = {
