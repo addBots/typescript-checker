@@ -13,7 +13,7 @@ Powerful data type validation library enabling type safety
 </a>
 
 -   🔒️ enables type safety on your TypeScript projects
--   ✔️ compatibility with TypeScript 3.x, (4.x after known issues are resovled)
+-   ✔️ compatibility with TypeScript 3.x, (4.x after known issues are resolved)
 -   0️⃣️ zero dependencies
 -   🚀️ super small bundle size
 -   👵️ es5 compatibility
