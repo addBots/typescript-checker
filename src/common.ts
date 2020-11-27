@@ -209,3 +209,36 @@ export const HasKeys = <T>(schema: KeysSchema<T>): Checker<unknown, T> => {
 		return [null, value as T]
 	}
 }
+
+type CheckPair = {
+	<T1, T2>(firstChecker: Checker<unknown, T1>, secondChecker: Checker<unknown, T2>): Checker<unknown, [T1, T2]>
+	<T extends unknown[]>(UCheck: Checker<unknown, T[0]>, TCheck: Checker<unknown, T[1]>): Checker<
+		unknown,
+		[T[0], T[1]]
+	>
+}
+
+export const checkPair: CheckPair = (
+	firstChecker: Checker<unknown, unknown>,
+	secondChecker: Checker<unknown, unknown>,
+): Checker<unknown, [unknown, unknown]> => (value) => {
+	const checkArray = TypeArray(value)
+	if (isCheckError(checkArray)) {
+		return checkArray
+	}
+
+	const tuple = checkArray[1]
+	if (tuple.length !== 2) {
+		return [["array length !== 2"]]
+	}
+	const firstCheck = firstChecker(tuple[0])
+	if (isCheckError(firstCheck)) {
+		return firstCheck
+	}
+	const secondCheck = secondChecker(tuple[1])
+	if (isCheckError(secondCheck)) {
+		return secondCheck
+	}
+
+	return [null, [firstCheck[1], secondCheck[1]]]
+}
