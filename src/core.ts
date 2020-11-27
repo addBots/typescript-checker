@@ -136,19 +136,25 @@ const AndChain = <U, A>(a: Checker<U, A>) => {
 	return <IAndChain<U, A>>checker
 }
 And.then = AndChain
+
 export const Merge = <U, A, B>(a: Checker<U, A>, b: Checker<U, B>): Checker<U, A & B> => {
 	const testA = a
 	const testB = b
 
 	return (value) => {
-		const result = testA(value)
-		if (isCheckError(result)) {
-			return result
+		const resultA = testA(value)
+		if (isCheckError(resultA)) {
+			return resultA
+		}
+		const resultB = testB(value)
+		if (isCheckError(resultB)) {
+			return resultB
 		}
 
-		return <Check<A & B>>(<unknown>testB(value))
+		return [null, { ...resultA[1], ...resultB[1] }]
 	}
 }
+
 export const Or = <T extends unknown[]>(
 	...types: { [key in keyof T]: Checker<unknown, T[key]> }
 ): Checker<unknown, T[number]> => {
