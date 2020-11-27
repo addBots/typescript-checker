@@ -274,6 +274,20 @@ try {
     const invalidResult = myJSONChecker("dodo") // invalidResult holds an error
     ```
 
+-   `checkPair` takes any value and checks if it's a pair with certain types
+
+    ```typescript
+    const simplePairChecker = checkPair(TypeString, TypeNumber) // [string, number]
+
+    simplePairChecker(["Hello", 42]) // valid
+    simplePairChecker([42, "Hello"]) // error
+    simplePairChecker(["Hello", 42, true]) // error, expects array of length 2
+
+    // use a custom defined tuple type
+    type CustomTuple = [string, boolean]
+    const customTupleTypeChecker = checkPair<CustomTuple>(TypeString, TypeBoolean)
+    ```
+
 ### Validators
 
 -   `MinLength(number)` checks if a given string has a minimum length
