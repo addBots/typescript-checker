@@ -43,7 +43,7 @@
 		"@typescript-eslint/eslint-plugin": "^4.14.1",
 		"@typescript-eslint/parser": "^4.14.1",
 		"eslint": "^7.18.0",
-		"eslint-config-prettier": "^7.2.0",
+		"eslint-config-prettier": "^8.0.0",
 		"eslint-plugin-react": "^7.21.5",
 		"eslint-plugin-react-hooks": "^4.2.0",
 		"faker": "^5.2.0",
