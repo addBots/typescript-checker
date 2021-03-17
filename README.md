@@ -441,7 +441,7 @@ const checkSomePickup = Or<IPickup[]>(checkSomeEgg) // missing grass
 
 ### TypeGuards
 
-Since typescript type guards are an important and strong utility to narrow down types and improve strict type checking in a codebase, we provide a covienient way to turn a checker into a type guard via the `TypeGuard` constructor function.
+Since typescript type guards are an important and strong utility to narrow down types and improve strict type checking in a codebase, we provide a convenient way to turn a checker into a type guard via the `TypeGuard` constructor function.
 
 ```typescript
 interface SomeObject {
