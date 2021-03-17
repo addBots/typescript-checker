@@ -439,14 +439,41 @@ const checkSomeEgg = Keys<IEgg>({
 const checkSomePickup = Or<IPickup[]>(checkSomeEgg) // missing grass
 ```
 
+### TypeGuards
+
+Since typescript type guards are an important and strong utility to narrow down types and improve strict type checking in a codebase, we provide a covienient way to turn a checker into a type guard via the `TypeGuard` constructor function.
+
+```typescript
+interface SomeObject {
+	propertyA: string
+	propertyB: boolean
+	propertyC: number
+}
+
+const checkSomeObj = Keys<SomeObject>({
+	propertyA: TypeString,
+	propertyB: TypeBoolean,
+	propertyC: TypeNumber,
+})
+
+const isSomeObject = TypeGuard(checkSomeObj)
+
+const someObj = {
+	propertyA: "allan",
+	propertyB: true,
+	propertyC: 42,
+}
+
+if (isSomeObject(someObj)) {
+	console.log("Success! " + someObj.propertyC)
+}
+```
+
 ## Roadmap / Todo
 
--   [ ] Support TypeScript 4.x
 -   [ ] JS docs annotations
 -   [ ] unit tests
--   [ ] convenient `express` integration
 -   [ ] extend common checkers
--   [ ] convenient `graphql` integration
 
 ## Contributors
 
