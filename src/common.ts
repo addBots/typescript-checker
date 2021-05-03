@@ -76,7 +76,7 @@ export const TypeParseBoolean: Checker<unknown, string> = (value) => {
 }
 
 export const TypeMatches = (name: string, regexp: RegExp): Checker<string, string> => (value) => {
-	if (!regexp.test(value)) {
+	if (regexp.test(value) === false) {
 		return [[`value does not match ${name}, found '${value}'`]]
 	}
 
