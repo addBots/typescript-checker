@@ -83,6 +83,14 @@ export const TypeMatches = (name: string, regexp: RegExp): Checker<string, strin
 	return [null, value]
 }
 
+export const TypeMatchesNot = (name: string, regexp: RegExp): Checker<string, string> => (value) => {
+	if (regexp.test(value) === true) {
+		return [[`value does match ${name} but should not, found '${value}'`]]
+	}
+
+	return [null, value]
+}
+
 export const ConvertJSON: Checker<string, unknown> = (value) => {
 	try {
 		return [null, JSON.parse(value)]
