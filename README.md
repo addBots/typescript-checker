@@ -388,10 +388,12 @@ type IBody = {
 }
 ```
 
-If you prefer to declare your interfaces and types separately, you can just provide the type to the checker to make sure your checked types are assignable to the interface types ahead of time. This can't ensure equivalence for optional members and union types.
+### Cast
+
+If you prefer to declare your interfaces and types separately, you can just provide the type to the Cast checker adapter to make sure your checked types are equivalent. This also works for union types and optional members.
 
 ```typescript
-type IBody = {
+type Body = {
 	name: string
 	age: number
 	meta: {
@@ -400,48 +402,117 @@ type IBody = {
 	}
 }
 
-// no compiler error
-const checkBody = Keys<IBody>({
-	name: And(TypeString, MinLength(2)),
-	age: TypeNumber,
-	meta: Keys({
-		canFly: TypeBoolean,
-		pickupItems: Items(OneOf("egg", "grass", "stone")),
+// everything ok
+const checkBody1 = Cast<Body>().as(
+	Keys({
+		name: And(TypeString, MinLength(2)),
+		age: TypeNumber,
+		meta: Keys({
+			canFly: TypeBoolean,
+			pickupItems: Items(OneOf("egg", "grass", "stone")),
+		}),
 	}),
-})
+	"same",
+)
 
-// compiler error -> key "meta" is missing in checker
-const checkBody = Keys<IBody>({
-	name: And(TypeString, MinLength(2)),
-	age: TypeNumber,
-})
-```
+// compiler error -> key "meta" is missing
+const checkBody2 = Cast<Body>().as(
+	// @ts-expect-error
+	Keys({
+		name: And(TypeString, MinLength(2)),
+		age: TypeNumber,
+	}),
+	"same",
+)
 
-When providing generics manually, following checkers will only succeed on some instances of IEgg and IPickup.
-
-```typescript
-type IEgg = {
-	type: "egg"
+type Egg = {
+	kind: "egg"
 	weight?: number
 }
 
-type IGrass = {
-	type: "grass"
+type Grass = {
+	kind: "grass"
 }
 
-type IPickup = IEgg | IGrass
+type Pickup = Egg | Grass
 
-const checkSomeEgg = Keys<IEgg>({
-	type: OneOf("egg"),
-	// missing weight
-})
+// compiler error -> key "weight" is missing
+const checkSomeEgg1 = Cast<Egg>().as(
+	Keys({
+		kind: OneOf("egg"),
+	}),
+	// @ts-expect-error
+	"same",
+)
 
-const checkSomePickup = Or<IPickup[]>(checkSomeEgg) // missing grass
+const checkSomeEgg2 = {} as Checker<unknown, Egg>
+
+// compiler error -> missing Grass
+const checkSomePickup = Cast<Pickup>().as(
+	Or(checkSomeEgg2),
+	// @ts-expect-error
+	"same",
+)
+```
+
+### Pitfalls
+
+When you manually override the generics of any checker constructor, the success type and the set of values that are accepted will differ. This will cause problems, when you use the success type to infer interface types. Therefore you should use `Cast` to create a checker adapter that only accepts checkers that symmetricaly matches the success type.
+
+```typescript
+// ❗ never explicitly pass generics to any checker constructor
+// it might work as expected (at first)
+{
+	type Body = {
+		name: string
+		age: number
+		meta: {
+			canFly: boolean
+			pickupItems: ("egg" | "grass" | "stone")[]
+		}
+	}
+
+	// no compiler error
+	const checkBody1 = Keys<Body>({
+		name: And(TypeString, MinLength(2)),
+		age: TypeNumber,
+		meta: Keys({
+			canFly: TypeBoolean,
+			pickupItems: Items(OneOf("egg", "grass", "stone")),
+		}),
+	})
+
+	// compiler error -> key "meta" is missing in checker
+	const checkBody2 = Keys<Body>({
+		name: And(TypeString, MinLength(2)),
+		age: TypeNumber,
+	})
+}
+
+// it may fail badly when you least expect it
+{
+	type Egg = {
+		type: "egg"
+		weight?: number
+	}
+
+	type Grass = {
+		type: "grass"
+	}
+
+	type Pickup = Egg | Grass
+
+	const checkSomeEgg = Keys<Egg>({
+		type: OneOf("egg"),
+		// 💥 missing weight
+	})
+
+	const checkSomePickup = Or<Pickup>(checkSomeEgg) // 💥 missing checkGrass
+}
 ```
 
 ## Roadmap / Todo
 
--   [ ] Support TypeScript 4.x
 -   [ ] JS docs annotations
 -   [ ] unit tests
 -   [ ] convenient `express` integration

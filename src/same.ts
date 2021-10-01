@@ -1,3 +1,5 @@
+import { Checker } from "./core"
+
 type Compound = object | readonly unknown[]
 
 type DeepRequired1<T> = { [key in keyof T]: DeepRequired<T> }
@@ -13,8 +15,8 @@ type IsOptional<A, keyA extends keyof A> = [Pick<A, keyA>, Pick<Required<A>, key
 	? 1
 	: 0
 type IsDifferentOptional<path extends unknown[], A, B, otherwise> = {
-	[key in keyof A | keyof B]-?: key extends keyof A
-		? key extends keyof B
+	[key in keyof A | keyof B]: [key] extends [keyof A]
+		? [key] extends [keyof B]
 			? [
 					[otherwise, { path: path; error: ["key", key, "is not required in", A, "but it is in", B] }],
 					[{ path: path; error: ["key", key, "is required in", A, "but not in", B] }, otherwise],
@@ -32,25 +34,47 @@ type IsDifferentPrimitive<path extends unknown[], A, B, otherwise> = IsDifferent
 	otherwise
 >
 type HasDifferentMembers<path extends unknown[], A, B, otherwise> = {
-	[key in keyof A | keyof B]: key extends keyof A
-		? key extends keyof B
+	[key in keyof A | keyof B]: [key] extends [keyof A]
+		? [key] extends [keyof B]
 			? WhatIsDifferent<[...path, key], A[key], B[key], otherwise>
-			: { path: [path]; error: ["key ", key, " is not in A"] }
-		: { path: [path]; error: ["key ", key, " is not in B"] }
+			: { path: path; error: ["key", key, "is not in A"] }
+		: { path: path; error: ["key", key, "is not in B"] }
 }[keyof A | keyof B]
 type IsDifferentCompound1<path extends unknown[], A, B, otherwise> = 1 extends 1
-	? IsDifferentOptional<path, A, B, HasDifferentMembers<path, A, B, otherwise>>
+	? HasDifferentMembers<path, A, B, IsDifferentOptional<path, A, B, otherwise>>
 	: never
 type IsDifferentCompound<path extends unknown[], A, B, otherwise> =
-	| (A extends A ? (A extends B ? never : IsDifferentCompound1<path, A, B, otherwise>) : never)
-	| (B extends B ? (B extends A ? never : IsDifferentCompound1<path, A, B, otherwise>) : never)
+	| (A extends A
+			? [A, DeepRequired<A>] extends [B, DeepRequired<B>]
+				? never
+				: IsDifferentCompound1<path, A, B, otherwise>
+			: never)
+	| (B extends B
+			? [B, DeepRequired<B>] extends [A, DeepRequired<A>]
+				? never
+				: IsDifferentCompound1<path, A, B, otherwise>
+			: never)
 type WhatIsDifferent<path extends unknown[], A, B, otherwise> = Same<A, B> extends "yes"
 	? otherwise
 	: IsDifferentPrimitive<path, A, B, IsDifferentCompound<path, A, B, otherwise>>
 
+type Reason<A, B> = WhatIsDifferent<[], A, B, never> extends infer Diff
+	? [Diff] extends [never]
+		? "same"
+		: Diff
+	: never
+
 export declare const same: {
 	<A, B>(same: Same<A, B>): void
-	because<A, B>(
-		reason: WhatIsDifferent<[], A, B, never> extends infer Diff ? ([Diff] extends [never] ? "same" : Diff) : never,
-	): void
+	because<A, B>(reason: Reason<A, B>): void
 }
+
+export type Cast<T> = {
+	as<A, B extends T>(checker: Checker<A, B>, same: Reason<T, B>): Checker<A, T>
+}
+
+export const Cast = <T>(): Cast<T> => ({
+	as(checker) {
+		return checker
+	},
+})
