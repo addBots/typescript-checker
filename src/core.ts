@@ -29,10 +29,18 @@ export type CheckerSuccess<M> = M extends Checker<infer A, infer B> ? B : never
 
 export const isCheckValid = <U>(args: Check<U>): args is CheckValid<U> => args[0] === null
 export const isCheckError = <U>(args: Check<U>): args is CheckError => args[0] !== null
-export const Type = <T extends TypeNames>(name: T): Checker<unknown, TypeNameType<T>> => (value) =>
-	isType(name, value) ? [null, value] : [["expected " + name + " found " + stringifyObject(value)]]
-export const CheckerRef = <A, B>(checkerRef: () => Checker<A, B>) => (value: A) => checkerRef()(value)
-export const Accept = <A>(): Checker<A, A> => (value) => [null, value]
+export const Type =
+	<T extends TypeNames>(name: T): Checker<unknown, TypeNameType<T>> =>
+	(value) =>
+		isType(name, value) ? [null, value] : [["expected " + name + " found " + stringifyObject(value)]]
+export const CheckerRef =
+	<A, B>(checkerRef: () => Checker<A, B>) =>
+	(value: A) =>
+		checkerRef()(value)
+export const Accept =
+	<A>(): Checker<A, A> =>
+	(value) =>
+		[null, value]
 export const OneOf = <T extends Types[]>(...items: T): Checker<unknown, T[number]> => {
 	return (value) => {
 		for (const item of items) {
@@ -63,14 +71,36 @@ export const ItemsPartial = <U, T>(items: ItemsSchema<T, U>): Checker<U[], T[]> 
 		return [null, obj]
 	}
 }
-export type KeysSchema<T> = { [key in keyof T]: Checker<unknown, T[key]> }
-export const KeysPartial = <T>(schema: KeysSchema<T>): Checker<Partial<Record<keyof T, unknown>>, T> => {
-	const keys = <(keyof T)[]>Object.keys(schema)
-	const tests = keys.map((key): [keyof T, (value: Partial<Record<keyof T, unknown>>) => Check<T[keyof T]>] => {
+
+type KeysSchema1<T> = {
+	readonly [key in keyof T]: Checker<unknown, T[key]>
+}
+export type KeysSchema<T> = KeysSchema1<Required<T>>
+export type KeysUnknown<T> = Partial<Record<keyof T, unknown>>
+
+export const KeysObject = ((schema, optional) => {
+	if (optional === undefined) {
+		return KeysObject1(schema)
+	}
+	return KeysObject2(schema, optional)
+}) as typeof KeysObject1 & typeof KeysObject2
+
+export const KeysObject1 = <T>(schema: KeysSchema<T>): Checker<KeysUnknown<T>, T> => {
+	return KeysObject2(schema, [])
+}
+
+export const KeysObject2 = <T, O extends keyof T>(
+	schema: KeysSchema<T>,
+	optional: Iterable<O> | readonly O[],
+): Checker<KeysUnknown<T>, Omit<T, O> & Partial<Pick<T, O>>> => {
+	const optionalSet = new Set<keyof T>(optional)
+	const keys = Object.keys(schema) as (keyof T)[]
+	const tests = keys.map((key): [keyof T, boolean, (value: KeysUnknown<T>) => Check<T[keyof T]>] => {
 		const test = schema[key]
 
 		return [
 			key,
+			optionalSet.has(key),
 			(value) => {
 				const result = test(value[key])
 				if (isCheckError(result)) {
@@ -84,7 +114,14 @@ export const KeysPartial = <T>(schema: KeysSchema<T>): Checker<Partial<Record<ke
 
 	return (value) => {
 		const obj: Partial<T> = {}
-		for (const [key, test] of tests) {
+		for (const [key, optional, test] of tests) {
+			if (!(key in value)) {
+				if (optional) {
+					continue
+				} else {
+					return [[`expected required property: ${key}`]]
+				}
+			}
 			const result = test(value)
 			if (isCheckError(result)) {
 				return result
@@ -92,7 +129,7 @@ export const KeysPartial = <T>(schema: KeysSchema<T>): Checker<Partial<Record<ke
 			obj[key] = result[1]
 		}
 
-		return [null, <T>obj]
+		return [null, obj as T]
 	}
 }
 
@@ -172,23 +209,25 @@ export const Or = <T extends unknown[]>(
 	}
 }
 
-export const Catch = <A, B>(check: Checker<A, B>, fallback: () => B) => (value: A): CheckValid<B> => {
-	const result = check(value)
-	if (isCheckError(result)) {
-		return [null, fallback()]
+export const Catch =
+	<A, B>(check: Checker<A, B>, fallback: () => B) =>
+	(value: A): CheckValid<B> => {
+		const result = check(value)
+		if (isCheckError(result)) {
+			return [null, fallback()]
+		}
+
+		return result
 	}
 
-	return result
-}
-
-export const Fallback = <A, B>(check: Checker<A | undefined, B>, fallback: () => B): Checker<A | undefined, B> => (
-	value,
-) => {
-	if (value === undefined) {
-		return [null, fallback()]
+export const Fallback =
+	<A, B>(check: Checker<A | undefined, B>, fallback: () => B): Checker<A | undefined, B> =>
+	(value) => {
+		if (value === undefined) {
+			return [null, fallback()]
+		}
+		return check(value)
 	}
-	return check(value)
-}
 
 export const withDefault = <T>(check: Check<T>, defaultValue: T): T => {
 	if (isCheckError(check)) {
