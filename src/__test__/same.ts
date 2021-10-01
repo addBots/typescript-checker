@@ -1,6 +1,6 @@
 import { same, Keys, TypeNumber, TypeString, And, Checker, OneOf, Cast, MinLength } from ".."
-import { Items, TypeBoolean } from "../common"
-import { Or } from "../core"
+import { Items, TypeBoolean, TypeUndefined } from "../common"
+import { CheckerSuccess, Or } from "../core"
 
 type A1 = { a: number; b: number | undefined }
 type B1 = { a: number; b: number | undefined }
@@ -108,4 +108,51 @@ export namespace README_Cast {
 		// @ts-expect-error
 		"same",
 	)
+}
+
+export namespace Fish {
+	export const checkFish1 = Keys({
+		species: TypeString,
+		amount: TypeNumber,
+	})
+	;() =>
+		same<
+			CheckerSuccess<typeof checkFish1>,
+			{
+				species: string
+				amount: number
+			}
+		>("yes")
+
+	export const checkFish2 = Keys(
+		{
+			species: TypeString,
+			amount: TypeNumber,
+		},
+		["amount"],
+	)
+	;() =>
+		same<
+			CheckerSuccess<typeof checkFish2>,
+			{
+				species: string
+				amount?: number
+			}
+		>("yes")
+
+	export const checkFish3 = Keys(
+		{
+			species: TypeString,
+			amount: Or(TypeUndefined, TypeNumber),
+		},
+		["amount"],
+	)
+	;() =>
+		same<
+			CheckerSuccess<typeof checkFish3>,
+			{
+				species: string
+				amount?: number | undefined
+			}
+		>("yes")
 }
