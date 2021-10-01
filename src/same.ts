@@ -8,6 +8,21 @@ type Same<A, B> = [A, B, DeepRequired<A>, DeepRequired<B>] extends [B, A, DeepRe
 	? "yes"
 	: "no"
 
+export declare const same: {
+	<A, B>(same: Same<A, B>): void
+	because<A, B>(reason: Reason<A, B>): void
+}
+
+export type Cast<T> = {
+	as<A, B extends T>(checker: Checker<A, B>, same: Reason<T, B>): Checker<A, T>
+}
+
+export const Cast = <T>(): Cast<T> => ({
+	as(checker) {
+		return checker
+	},
+})
+
 type IsOptional<A, keyA extends keyof A> = [Pick<A, keyA>, Pick<Required<A>, keyA>] extends [
 	Pick<Required<A>, keyA>,
 	Pick<A, keyA>,
@@ -63,18 +78,3 @@ type Reason<A, B> = WhatIsDifferent<[], A, B, never> extends infer Diff
 		? "same"
 		: Diff
 	: never
-
-export declare const same: {
-	<A, B>(same: Same<A, B>): void
-	because<A, B>(reason: Reason<A, B>): void
-}
-
-export type Cast<T> = {
-	as<A, B extends T>(checker: Checker<A, B>, same: Reason<T, B>): Checker<A, T>
-}
-
-export const Cast = <T>(): Cast<T> => ({
-	as(checker) {
-		return checker
-	},
-})
