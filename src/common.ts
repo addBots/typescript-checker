@@ -95,7 +95,7 @@ export const ConvertJSON: Checker<string, unknown> = (value) => {
 	try {
 		return [null, JSON.parse(value)]
 	} catch (e) {
-		return [["failed parsing string as json, " + e.message]]
+		return [["failed parsing string as json, " + (e as SyntaxError).message]]
 	}
 }
 
@@ -197,11 +197,11 @@ export const parsesAs = <T = never>(check: Checker<T, unknown>): Checker<T, T> =
 	return [null, value]
 }
 export const ConvertDate: Checker<unknown, Date> = And(TypeString, (value: string) => {
-	try {
-		return [null, new Date(value)]
-	} catch (e) {
-		return [[e.message]]
+	const date = new Date(value)
+	if (isNaN(date.valueOf())) {
+		return [[`invalid date: ${value}`]]
 	}
+	return [null, date]
 })
 export const TypeParseDate = And(TypeString, parsesAs<string>(ConvertDate))
 
