@@ -22,7 +22,8 @@
 		"checker",
 		"safety",
 		"json",
-		"validate"
+		"validate",
+		"exactOptionalPropertyTypes"
 	],
 	"author": "addBots",
 	"license": "MIT",

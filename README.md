@@ -14,6 +14,7 @@ Powerful data type validation library enabling type safety
 
 -   🔒️ enables type safety on your TypeScript projects
 -   ✔️ compatibility with TypeScript 3.x and 4.x
+-   ✔️ supports exactOptionalPropertyTypes
 -   0️⃣️ zero dependencies
 -   🚀️ super small bundle size
 -   👵️ es5 compatibility
