@@ -501,6 +501,7 @@ When you manually override the generics of any checker constructor, the success 
 {
 	type Egg = {
 		type: "egg"
+		color: "red" | "yellow"
 		weight?: number
 	}
 
@@ -512,7 +513,8 @@ When you manually override the generics of any checker constructor, the success 
 
 	const checkSomeEgg = Keys<Egg>({
 		type: OneOf("egg"),
-		// 💥 missing weight
+		color: OneOf("red"), // 💥 missing "yellow"
+		// 💥 missing weight (for typescript-checker < 2)
 	})
 
 	const checkSomePickup = Or<Pickup>(checkSomeEgg) // 💥 missing checkGrass
