@@ -212,11 +212,19 @@ try {
 
     const checkNestedBody = Keys({
     	name: And(TypeString, MinLength(2)),
-    	age: Or(TypeUndefined, TypeNumber), // optional property
+    	age: Or(TypeUndefined, TypeNumber), // property that must exist, but that may be undefined
     	meta: Keys({
     		canFly: TypeBoolean,
     	}),
     })
+
+    const checkOptionalBody = Keys(
+    	{
+    		name: And(TypeString, MinLength(2)),
+    		age: TypeNumber, // optional property
+    	},
+    	["age"],
+    )
     ```
 
 -   `Items` checks for an array containing certain item types
