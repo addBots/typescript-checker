@@ -7,10 +7,11 @@ import {
 	Check,
 	KeysSchema,
 	And,
-	KeysPartial,
 	ItemsSchema,
 	ItemsPartial,
 	isCheckError,
+	KeysObject1,
+	KeysObject2,
 } from "./core"
 
 export const TypeUndefined = Type("undefined")
@@ -75,27 +76,31 @@ export const TypeParseBoolean: Checker<unknown, string> = (value) => {
 	return string
 }
 
-export const TypeMatches = (name: string, regexp: RegExp): Checker<string, string> => (value) => {
-	if (value.match(regexp) === null) {
-		return [[`value does not match ${name}, found '${value}'`]]
+export const TypeMatches =
+	(name: string, regexp: RegExp): Checker<string, string> =>
+	(value) => {
+		if (value.match(regexp) === null) {
+			return [[`value does not match ${name}, found '${value}'`]]
+		}
+
+		return [null, value]
 	}
 
-	return [null, value]
-}
+export const TypeMatchesNot =
+	(name: string, regexp: RegExp): Checker<string, string> =>
+	(value) => {
+		if (value.match(regexp) !== null) {
+			return [[`value does match ${name} but should not, found '${value}'`]]
+		}
 
-export const TypeMatchesNot = (name: string, regexp: RegExp): Checker<string, string> => (value) => {
-	if (value.match(regexp) !== null) {
-		return [[`value does match ${name} but should not, found '${value}'`]]
+		return [null, value]
 	}
-
-	return [null, value]
-}
 
 export const ConvertJSON: Checker<string, unknown> = (value) => {
 	try {
 		return [null, JSON.parse(value)]
 	} catch (e) {
-		return [["failed parsing string as json, " + e.message]]
+		return [["failed parsing string as json, " + (e as SyntaxError).message]]
 	}
 }
 
@@ -177,38 +182,52 @@ export const RecordPartial = <K extends string, T>(
 		return [null, obj]
 	})
 
-export const TypeCheck = <U, T extends U>(check: (value: U) => value is T, type = "custom type") => (
-	value: U,
-): Check<T> => (check(value) ? [null, value] : [[`expected ${type}, found: ${value}`]])
+export const TypeCheck =
+	<U, T extends U>(check: (value: U) => value is T, type = "custom type") =>
+	(value: U): Check<T> =>
+		check(value) ? [null, value] : [[`expected ${type}, found: ${value}`]]
 
-export const checkInstanceOf = <T>(constructor: { new (...args: any): T; name: string }) => (
-	value: unknown,
-): Check<T> => (value instanceof constructor ? [null, value] : [[`expected ${constructor.name}`]])
-
-export const Keys = <T>(schema: KeysSchema<T>) => And(TypeObject, KeysPartial(schema))
+export const checkInstanceOf =
+	<T>(constructor: { new (...args: any): T; name: string }) =>
+	(value: unknown): Check<T> =>
+		value instanceof constructor ? [null, value] : [[`expected ${constructor.name}`]]
+export const Keys = ((schema, optional) => {
+	if (optional === undefined) {
+		return Keys1(schema)
+	}
+	return Keys2(schema, optional)
+}) as typeof Keys1 & typeof Keys2
+export const Keys1 = <T>(schema: KeysSchema<T>) => And(TypeObject, KeysObject1(schema))
+export const Keys2 = <T, O extends keyof T>(schema: KeysSchema<T>, optional: Iterable<O> | readonly O[]) =>
+	And(TypeObject, KeysObject2(schema, optional))
 export const Items = <T>(schema: ItemsSchema<T>) => And(TypeArray, ItemsPartial(schema))
 
-export const parsesAs = <T = never>(check: Checker<T, unknown>): Checker<T, T> => (value: T) => {
-	const result = check(value)
-	if (isCheckError(result)) {
-		return result
-	}
+export const parsesAs =
+	<T = never>(check: Checker<T, unknown>): Checker<T, T> =>
+	(value: T) => {
+		const result = check(value)
+		if (isCheckError(result)) {
+			return result
+		}
 
-	return [null, value]
-}
-export const ConvertDate: Checker<unknown, Date> = And(TypeString, (value: string) => {
-	try {
-		return [null, new Date(value)]
-	} catch (e) {
-		return [[e.message]]
+		return [null, value]
 	}
+export const ConvertDate: Checker<unknown, Date> = And(TypeString, (value: string) => {
+	const date = new Date(value)
+	if (isNaN(date.valueOf())) {
+		return [[`invalid date: ${value}`]]
+	}
+	return [null, date]
 })
 export const TypeParseDate = And(TypeString, parsesAs<string>(ConvertDate))
 
-export const Transform = <T, R>(transformFn: (value: T) => R): Checker<T, R> => (value) => [null, transformFn(value)]
+export const Transform =
+	<T, R>(transformFn: (value: T) => R): Checker<T, R> =>
+	(value) =>
+		[null, transformFn(value)]
 
 export const HasKeys = <T>(schema: KeysSchema<T>): Checker<unknown, T> => {
-	const check = And(TypeObject, KeysPartial(schema))
+	const check = And(TypeObject, KeysObject1(schema))
 	return (value) => {
 		const result = check(value)
 		if (isCheckError(result)) {
@@ -226,27 +245,29 @@ type CheckPair = {
 	>
 }
 
-export const checkPair: CheckPair = (
-	firstChecker: Checker<unknown, unknown>,
-	secondChecker: Checker<unknown, unknown>,
-): Checker<unknown, [unknown, unknown]> => (value) => {
-	const checkArray = TypeArray(value)
-	if (isCheckError(checkArray)) {
-		return checkArray
-	}
+export const checkPair: CheckPair =
+	(
+		firstChecker: Checker<unknown, unknown>,
+		secondChecker: Checker<unknown, unknown>,
+	): Checker<unknown, [unknown, unknown]> =>
+	(value) => {
+		const checkArray = TypeArray(value)
+		if (isCheckError(checkArray)) {
+			return checkArray
+		}
 
-	const tuple = checkArray[1]
-	if (tuple.length !== 2) {
-		return [["array length !== 2"]]
-	}
-	const firstCheck = firstChecker(tuple[0])
-	if (isCheckError(firstCheck)) {
-		return firstCheck
-	}
-	const secondCheck = secondChecker(tuple[1])
-	if (isCheckError(secondCheck)) {
-		return secondCheck
-	}
+		const tuple = checkArray[1]
+		if (tuple.length !== 2) {
+			return [["array length !== 2"]]
+		}
+		const firstCheck = firstChecker(tuple[0])
+		if (isCheckError(firstCheck)) {
+			return firstCheck
+		}
+		const secondCheck = secondChecker(tuple[1])
+		if (isCheckError(secondCheck)) {
+			return secondCheck
+		}
 
-	return [null, [firstCheck[1], secondCheck[1]]]
-}
+		return [null, [firstCheck[1], secondCheck[1]]]
+	}

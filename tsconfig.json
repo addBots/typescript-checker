@@ -22,7 +22,7 @@
 		"noImplicitAny": true,
 		"skipLibCheck": true,
 		"strictNullChecks": true,
-		"suppressImplicitAnyIndexErrors": true
+		"exactOptionalPropertyTypes": true
 	},
 	"include": ["src"],
 	"compileOnSave": true
